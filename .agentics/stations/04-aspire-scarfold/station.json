@@ -1,0 +1,9 @@
+{
+  "id": "implementation",
+  "name": "Aspire Scarfold",
+  "trigger": {
+    "type": "dispatch_worker",
+    "autoGit": true,
+    "commitMessageTemplate": "chore: aspire scaffold with nextjs landing page"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "id": "planning",
+  "name": "Brand Deliverables",
+  "trigger": {
+    "type": "dispatch_worker",
+    "installAgentsFromColumn": "research",
+    "autoGit": true
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "id": "research",
+  "name": "Design System",
+  "trigger": {
+    "type": "dispatch_worker",
+    "installAgentsFromColumn": "todo",
+    "autoGit": true
+  }
+}

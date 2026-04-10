@@ -1,0 +1,7 @@
+{
+  "id": "testing",
+  "name": "Simple E2E Proof",
+  "trigger": {
+    "type": "none"
+  }
+}

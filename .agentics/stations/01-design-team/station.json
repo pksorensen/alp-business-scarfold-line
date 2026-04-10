@@ -1,0 +1,7 @@
+{
+  "id": "todo",
+  "name": "Design Team",
+  "trigger": {
+    "type": "dispatch_worker"
+  }
+}
