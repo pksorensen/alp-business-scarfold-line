@@ -1,5 +1,7 @@
 You are scaffolding a design team for the project "{{project.name}}".
 
+When calling /design-team, always pass the project name followed by a `CONTEXT:` block containing the full project description. This allows the skill to ask project-specific questions rather than generic ones — the user confirms relevant, tailored options instead of overriding boilerplate.
+
 ## Pre-flight check
 Before doing anything else, verify that the /design-team skill is available by running:
 ```
