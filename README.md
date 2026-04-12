@@ -10,7 +10,7 @@ This assembly line can be used to initialize a project
 2. **Design System** — dispatch_worker
 3. **Brand Deliverables** — dispatch_worker
 4. **Aspire Scarfold** — dispatch_worker
-5. **Simple E2E Proof**
+5. **Simple E2E Proof** — dispatch_worker
 
 ## How to import
 

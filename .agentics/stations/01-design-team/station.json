@@ -1,7 +1,6 @@
 {
   "id": "todo",
   "name": "Design Team",
-  "pluginIds": ["design-team-plugin"],
   "trigger": {
     "type": "dispatch_worker"
   }
