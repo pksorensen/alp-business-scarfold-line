@@ -1,6 +1,9 @@
 {
   "id": "implementation",
   "name": "Aspire Scarfold",
+  "operatorConfig": {
+    "autoApproveImageUploads": true
+  },
   "trigger": {
     "type": "dispatch_worker",
     "autoGit": true,

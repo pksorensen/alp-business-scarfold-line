@@ -1,6 +1,9 @@
 {
   "id": "research",
   "name": "Design System",
+  "operatorConfig": {
+    "autoApproveImageUploads": true
+  },
   "trigger": {
     "type": "dispatch_worker",
     "installAgentsFromColumn": "todo",

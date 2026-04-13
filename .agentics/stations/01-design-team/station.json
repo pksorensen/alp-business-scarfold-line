@@ -2,6 +2,9 @@
   "id": "todo",
   "name": "Design Team",
   "pluginIds": ["design-team-plugin"],
+  "operatorConfig": {
+    "autoApproveImageUploads": true
+  },
   "trigger": {
     "type": "dispatch_worker"
   }
