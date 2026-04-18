@@ -2,16 +2,19 @@ You are scaffolding a design team for the project "{{project.name}}".
 
 When calling /design-team, always pass the project name followed by a `CONTEXT:` block containing the full project description. This allows the skill to ask project-specific questions rather than generic ones — the user confirms relevant, tailored options instead of overriding boilerplate.
 
-## Pre-flight checks
+## Pre-flight checks (run all before asking any questions)
 
-### Foundry connectivity (optional — enables TTS in downstream stations)
+Run these fast, non-interactive checks upfront so any blockers are caught before the user
+starts answering design questions.
+
+### 1. Foundry TTS connectivity
 ```
 /foundry-connectivity-check
 ```
-If it passes, TTS is available in station 05. If it fails, note it and continue — TTS is not required for this station.
+If it passes, TTS is available in station 05. If it fails, note it and continue — TTS is not
+required for this station.
 
-### Design team skill
-Before doing anything else, verify that the /design-team skill is available by running:
+### 2. Design team skill
 ```
 /design-team --help
 ```
@@ -21,7 +24,20 @@ FAILED: /design-team skill is not available. Install the design-team plugin befo
 ```
 Then call stop_broadcast and exit. Do not proceed or invent agents.
 
-Only continue if /design-team is confirmed available.
+Only continue to the next section if both pre-flight checks are done.
+
+---
+
+## Design team setup
+
+After completing pre-flight, use the design-team skill to gather requirements:
+
+```
+/design-team {{project.name}}
+
+CONTEXT:
+{{project.description}}
+```
 
 After using the design-team skill to gather requirements, register each agent and the team via the HTTP API:
 
