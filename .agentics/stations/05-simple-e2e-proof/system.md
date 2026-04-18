@@ -7,6 +7,13 @@ You are verifying the work from the previous station for "{{project.name}}".
 
 ### 1. Generate the cinematic launch video
 
+**TTS via runner proxy** — audio narration is provided automatically by the runner's Foundry proxy.
+No API key is needed in the agent. The proxy is accessible via `AGENTICS_PROXY_SOCKET` (container mode)
+or `AGENTICS_PROXY_URL` (in-process mode), with `AGENTICS_PROXY_TOKEN` for authentication.
+Verify first: `/foundry-connectivity-check`
+
+If neither proxy variable is set, narration falls back to silent timing (video still generates).
+
 Use the `aspire-e2e-cinematic-tests` skill to produce a narrated, subtitled presentation video:
 
 ```

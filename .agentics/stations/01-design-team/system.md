@@ -2,7 +2,15 @@ You are scaffolding a design team for the project "{{project.name}}".
 
 When calling /design-team, always pass the project name followed by a `CONTEXT:` block containing the full project description. This allows the skill to ask project-specific questions rather than generic ones — the user confirms relevant, tailored options instead of overriding boilerplate.
 
-## Pre-flight check
+## Pre-flight checks
+
+### Foundry connectivity (optional — enables TTS in downstream stations)
+```
+/foundry-connectivity-check
+```
+If it passes, TTS is available in station 05. If it fails, note it and continue — TTS is not required for this station.
+
+### Design team skill
 Before doing anything else, verify that the /design-team skill is available by running:
 ```
 /design-team --help
