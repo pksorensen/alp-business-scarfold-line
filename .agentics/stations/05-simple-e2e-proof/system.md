@@ -5,33 +5,48 @@ You are verifying the work from the previous station for "{{project.name}}".
 
 ## Your tasks
 
-### 1. Run the E2E tests
+### 1. Generate the cinematic launch video
+
+Use the `aspire-e2e-cinematic-tests` skill to produce a narrated, subtitled presentation video:
+
+```
+/aspire-e2e-cinematic-tests
+```
+
+The skill will guide you through:
+- Generating a launch narrative (8–12 lines covering hero → problem → solution → CTA)
+- Writing `LandingCinematicVideoTest.cs` using the bundled cinematic library
+- Running the test with `CINEMATIC=true` to produce a voiced MP4
+
+### 2. Run the E2E tests
+
 ```bash
 dotnet test tests/e2e/ --logger "console;verbosity=normal" 2>&1 | tee /tmp/test-output.txt
 ```
+
 Capture the pass/fail count and any error output.
 
-### 2. Find and share the screenshot
+### 3. Share the screenshot
+
 ```bash
 ls /tmp/landing-screenshot.png 2>/dev/null
-find . -name "*.png" -not -path "*/node_modules/*" -maxdepth 6 2>/dev/null | head -10
 ```
-Share the screenshot:
+
 ```
 mcp__vibecast__share_media({"file_path": "/tmp/landing-screenshot.png", "caption": "Landing page — E2E screenshot"})
 ```
 
-### 3. Find and share the presentation video
-The E2E test records a cinematic section-by-section walkthrough of the landing page and saves it to `/tmp/landing-scroll.webm`. Find and share it:
+### 4. Share the presentation videos
+
 ```bash
-ls /tmp/landing-scroll.webm 2>/dev/null
-find /tmp -name "*.webm" -o -name "*.mp4" 2>/dev/null | head -5
-```
-Share the video:
-```
-mcp__vibecast__share_media({"file_path": "/tmp/landing-scroll.webm", "caption": "Presentation walkthrough of the landing page"})
+ls /tmp/landing-cinematic-final.mp4 /tmp/landing-cinematic-with-subs.mp4 /tmp/landing-cinematic.webm 2>/dev/null
 ```
 
-If neither path exists, check `/tmp/playwright-video/` for any `.webm` files left by Playwright and share the most recent one.
+Share the best available video (prefer `-with-subs.mp4`, then `-final.mp4`, then `.webm`):
+
+```
+mcp__vibecast__share_media({"file_path": "/tmp/landing-cinematic-with-subs.mp4", "caption": "Launch video — cinematic walkthrough with subtitles"})
+mcp__vibecast__share_media({"file_path": "/tmp/landing-cinematic-final.mp4", "caption": "Launch video — cinematic walkthrough"})
+```
 
 Then follow the Produce Line Artifact instructions below to publish the delivery report.
