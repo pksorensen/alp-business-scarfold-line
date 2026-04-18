@@ -85,8 +85,10 @@ public class LandingPageTests : PlaywrightTest
             await page.CloseAsync();
         }
 
-        // ── 2. Scroll-through video ───────────────────────────────────────────
-        // Playwright records video per-context; file is written on context close.
+        // ── 2. Presentation scroll video ─────────────────────────────────────
+        // Goal: a polished, presenter-quality walkthrough — slow smooth scroll,
+        // pausing at each major section so viewers can read the content.
+        // Duration is content-driven, not fixed.
         var videoDir = "/tmp/playwright-video/";
         Directory.CreateDirectory(videoDir);
 
@@ -99,22 +101,71 @@ public class LandingPageTests : PlaywrightTest
         var videoPage = await context.NewPageAsync();
         await videoPage.GotoAsync(baseUrl);
         await videoPage.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        await Task.Delay(800); // let any animations settle
+        await Task.Delay(1500); // pause at top so hero is readable
 
-        // Slow scroll through the full page height
+        // Collect section anchor points: top of each major section/landmark element.
+        // Fall back to evenly-spaced stops if no sections are found.
+        var sectionTops = await videoPage.EvaluateAsync<int[]>(@"
+            (() => {
+                // Target semantic section breaks — sections, articles, major divs with headings
+                const candidates = [
+                    ...document.querySelectorAll('section, article, [id], h1, h2, h3')
+                ];
+                const viewH = window.innerHeight;
+                const pageH = document.body.scrollHeight;
+                const seen = new Set();
+                const tops = [];
+                for (const el of candidates) {
+                    const rect = el.getBoundingClientRect();
+                    const absTop = rect.top + window.scrollY;
+                    // Skip elements in the top viewport (already visible at start) and near-duplicates
+                    if (absTop < viewH * 0.8) continue;
+                    const bucket = Math.round(absTop / (viewH * 0.5));
+                    if (seen.has(bucket)) continue;
+                    seen.add(bucket);
+                    tops.push(Math.min(Math.round(absTop - viewH * 0.05), pageH - viewH));
+                }
+                // Always end at the bottom
+                tops.push(pageH - viewH);
+                return tops.filter(t => t > 0);
+            })()
+        ");
+
+        // If no sections found, fall back to 6 evenly-spaced stops
         var pageHeight = await videoPage.EvaluateAsync<int>("document.body.scrollHeight");
-        const int steps = 30;
-        for (int i = 0; i <= steps; i++)
+        var viewportHeight = 900;
+        if (sectionTops == null || sectionTops.Length == 0)
         {
-            var scrollY = (int)((double)pageHeight * i / steps);
-            await videoPage.EvaluateAsync($"window.scrollTo({{ top: {scrollY}, behavior: 'smooth' }})");
-            await Task.Delay(200);
+            int stops = 6;
+            sectionTops = Enumerable.Range(1, stops)
+                .Select(i => Math.Min((int)((double)(pageHeight - viewportHeight) * i / stops), pageHeight - viewportHeight))
+                .ToArray();
         }
-        await Task.Delay(800); // pause at bottom
+
+        // Smoothly scroll to each section stop, pausing to let viewers read
+        int currentY = 0;
+        foreach (var targetY in sectionTops)
+        {
+            if (targetY <= currentY) continue;
+            int distance = targetY - currentY;
+            // Micro-step smooth scroll: ~4px per frame at ~30fps feels cinematic
+            int microSteps = Math.Max(20, distance / 4);
+            for (int s = 1; s <= microSteps; s++)
+            {
+                var y = currentY + (int)((double)distance * s / microSteps);
+                await videoPage.EvaluateAsync($"window.scrollTo({{ top: {y}, behavior: 'instant' }})");
+                await Task.Delay(33); // ~30fps
+            }
+            currentY = targetY;
+            // Pause at each section so content is readable (1.5–2.5s depending on distance)
+            int pauseMs = distance > viewportHeight ? 2500 : 1500;
+            await Task.Delay(pauseMs);
+        }
+        await Task.Delay(1500); // linger at bottom
 
         // Scroll back to top
         await videoPage.EvaluateAsync("window.scrollTo({ top: 0, behavior: 'smooth' })");
-        await Task.Delay(600);
+        await Task.Delay(1000);
 
         // Closing context flushes the video file
         var videoPath = await videoPage.Video!.PathAsync();
