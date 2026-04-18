@@ -79,7 +79,7 @@ Fix any compilation or runtime errors before proceeding.
 ### 8. Share the screenshot
 Once the test passes and `/tmp/landing-screenshot.png` exists, share it using the vibecast MCP tool:
 ```
-mcp__vibecast__share_image({"image_path": "/tmp/landing-screenshot.png", "caption": "Landing page screenshot from Aspire E2E test"})
+mcp__vibecast__share_media({"file_path": "/tmp/landing-screenshot.png", "caption": "Landing page screenshot from Aspire E2E test"})
 ```
 
 ### 9. Commit and finish
