@@ -1,7 +1,7 @@
 {
   "id": "todo",
   "name": "Design Team",
-  "pluginIds": ["design-team-plugin"],
+  "pluginIds": ["design-team-plugin", "pks-foundry"],
   "operatorConfig": {
     "autoApproveImageUploads": true
   },
