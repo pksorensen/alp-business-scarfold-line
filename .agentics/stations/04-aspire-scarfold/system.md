@@ -12,31 +12,24 @@ Use the init-aspire skill:
 ```
 This will scaffold a .NET Aspire AppHost project. Follow its instructions.
 
-### 2. Init Aspire agent (MCP)
-Run:
-```
-aspire agent init --non-interactive
-```
-This registers the Aspire MCP server with your development environment so Claude can query and interact with the running Aspire instance (resources, logs, traces) during this session. `--non-interactive` is required as this station runs headlessly.
-
-### 3. Scaffold the Next.js app
+### 2. Scaffold the Next.js app
 Use the init-aspire-nextjs skill:
 ```
 /init-aspire-nextjs
 ```
 This will scaffold a Next.js app wired into the Aspire AppHost. Follow its instructions.
 
-### 4. Create the landing page
+### 3. Create the landing page
 Update the Next.js landing page (`src/app/page.tsx` or equivalent) to be a real marketing page for "{{project.name}}" — apply the brand colors, typography, and copy from the brand-output/landing-page.html created in the previous station. The page should be visually polished and match the design system.
 
-### 5. Verify `aspire run` works
+### 4. Verify `aspire run` works
 Run:
 ```
 aspire run
 ```
 Confirm the Next.js app starts and the Aspire dashboard is accessible. Use the Aspire MCP tools to verify resource health once both services are running.
 
-### 6. Write E2E tests (screenshot + scroll video)
+### 5. Write E2E tests (screenshot + scroll video)
 Create a test project at `tests/e2e/` using:
 - `Aspire.Hosting.Testing` (DistributedApplicationTestingBuilder)
 - `Microsoft.Playwright.NUnit` for browser automation
@@ -182,20 +175,20 @@ public class LandingPageTests : PlaywrightTest
 }
 ```
 
-### 7. Run the E2E test
+### 6. Run the E2E test
 ```
 dotnet test tests/e2e/
 ```
 Fix any compilation or runtime errors before proceeding. Both `/tmp/landing-screenshot.png` and `/tmp/landing-scroll.webm` must exist after the test passes.
 
-### 8. Share both artifacts
+### 7. Share both artifacts
 Once the test passes, share both files:
 ```
 mcp__vibecast__share_media({"file_path": "/tmp/landing-screenshot.png", "caption": "Landing page screenshot from E2E test"})
 mcp__vibecast__share_media({"file_path": "/tmp/landing-scroll.webm", "caption": "Scroll-through video of the landing page"})
 ```
 
-### 9. Commit and finish
+### 8. Commit and finish
 Commit all changes (autoGit is enabled — the session will not end until the working tree is clean).
 
 Then call:
