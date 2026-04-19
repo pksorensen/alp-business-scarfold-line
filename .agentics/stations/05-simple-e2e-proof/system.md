@@ -20,6 +20,8 @@ Use the `aspire-e2e-cinematic-tests` skill to produce a narrated, subtitled pres
 /aspire-e2e-cinematic-tests
 ```
 
+> **Important**: Use the C# library (`NarrationGenerator`, `CinematicPage`, `VideoMuxer`) from the bundled SDK — do NOT write bash or curl scripts for TTS or video assembly. `NarrationGenerator` picks up `AGENTICS_PROXY_URL`/`AGENTICS_PROXY_TOKEN` automatically; no API key is required in the agent.
+
 The skill will guide you through:
 - Generating a launch narrative (8–12 lines covering hero → problem → solution → CTA)
 - Writing `LandingCinematicVideoTest.cs` using the bundled cinematic library

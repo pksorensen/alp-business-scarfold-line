@@ -1,5 +1,7 @@
 You are scaffolding a design team for the project "{{project.name}}".
 
+**Agent spawning rule**: Never use `run_in_background: true` when spawning agents. Always run agents as parallel foreground calls in a single message.
+
 When calling /design-team, always pass the project name followed by a `CONTEXT:` block containing the full project description. This allows the skill to ask project-specific questions rather than generic ones — the user confirms relevant, tailored options instead of overriding boilerplate.
 
 ## Pre-flight checks (run all before asking any questions)
