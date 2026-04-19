@@ -2,7 +2,8 @@
   "id": "planning",
   "name": "Brand Deliverables",
   "operatorConfig": {
-    "autoApproveImageUploads": true
+    "autoApproveImageUploads": true,
+    "disableBackgroundTasks": true
   },
   "trigger": {
     "type": "dispatch_worker",

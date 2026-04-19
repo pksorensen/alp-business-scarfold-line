@@ -2,7 +2,8 @@
   "id": "research",
   "name": "Design System",
   "operatorConfig": {
-    "autoApproveImageUploads": true
+    "autoApproveImageUploads": true,
+    "disableBackgroundTasks": true
   },
   "trigger": {
     "type": "dispatch_worker",
