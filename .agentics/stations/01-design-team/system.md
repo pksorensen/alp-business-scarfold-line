@@ -11,8 +11,8 @@ starts answering design questions.
 ```
 /foundry-connectivity-check
 ```
-If it passes, TTS is available in station 05. If it fails, note it and continue — TTS is not
-required for this station.
+If it passes, TTS is available in station 05. If it fails, call stop_broadcast with conclusion
+failure and message "Foundry TTS check failed — fix proxy config before running this line." Do not proceed.
 
 ### 2. Design team skill
 ```
