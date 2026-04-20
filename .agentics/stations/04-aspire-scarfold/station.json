@@ -1,0 +1,13 @@
+{
+  "id": "implementation",
+  "name": "Aspire Scarfold",
+  "pluginIds": ["pks-foundry", "init-aspire", "init-aspire-nextjs", "aspire-e2e-cinematic-tests", "pks-playwright"],
+  "operatorConfig": {
+    "autoApproveImageUploads": true
+  },
+  "trigger": {
+    "type": "dispatch_worker",
+    "autoGit": true,
+    "commitMessageTemplate": "chore: aspire scaffold with nextjs landing page"
+  }
+}

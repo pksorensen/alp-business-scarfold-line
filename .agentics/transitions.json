@@ -1,0 +1,23 @@
+[
+  {
+    "from": "todo",
+    "to": "research",
+    "condition": "success",
+    "gate": "mnkjyu1d-waj0t5"
+  },
+  {
+    "from": "planning",
+    "to": "implementation",
+    "condition": "success"
+  },
+  {
+    "from": "research",
+    "to": "planning",
+    "condition": "success"
+  },
+  {
+    "from": "implementation",
+    "to": "testing",
+    "condition": "success"
+  }
+]
