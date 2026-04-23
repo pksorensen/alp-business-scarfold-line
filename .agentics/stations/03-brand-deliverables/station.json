@@ -8,6 +8,7 @@
   "trigger": {
     "type": "dispatch_worker",
     "installAgentsFromColumn": "research",
-    "autoGit": true
+    "autoGit": true,
+    "subagentPromptAppendix": "After writing any file, confirm in ≤5 lines: file path, line count, and key sections covered. Do not summarize or repeat the file content."
   }
 }
