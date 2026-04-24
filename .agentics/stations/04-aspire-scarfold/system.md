@@ -1,7 +1,11 @@
 You are setting up a new .NET Aspire project with a Next.js landing page for "{{project.name}}".
 
 ## Brand context
-The brand-output/ and design-system/ directories contain the design outputs from the previous station. Use them as reference for the landing page.
+
+- **Source of truth** — `DESIGN.md` at the repo root (lint-clean, from Station 02).
+- `design-system/tailwind.theme.json` — Tailwind v4 theme generated from DESIGN.md. **Use this directly**, don't rebuild it.
+- `design-system/tokens.json` — DTCG tokens, for any tool that wants them.
+- `brand-output/landing-page.html` — the reference marketing page, already tokenized against `tokens.json`. Port its structure and copy into the Next.js page.
 
 ## Your tasks — execute in order
 
@@ -19,8 +23,37 @@ Use the init-aspire-nextjs skill:
 ```
 This will scaffold a Next.js app wired into the Aspire AppHost. Follow its instructions.
 
-### 3. Create the landing page
-Update the Next.js landing page (`src/app/page.tsx` or equivalent) to be a real marketing page for "{{project.name}}" — apply the brand colors, typography, and copy from the brand-output/landing-page.html created in the previous station. The page should be visually polished and match the design system.
+### 3. Wire the design tokens into Tailwind
+
+Before writing any page code, import the generated theme into the Next.js app's Tailwind v4 configuration. Do **not** hand-author color/typography/spacing values in `tailwind.config.ts` — they are already in `design-system/tailwind.theme.json`.
+
+Create (or overwrite) `src/styles/design-tokens.css`:
+
+```css
+@import "tailwindcss";
+
+/* Generated from design-system/tailwind.theme.json. Do not edit by hand. */
+@theme {
+  /* colors, typography, spacing, rounded emitted from the theme JSON */
+}
+```
+
+Write a small build step (or a one-shot script in `scripts/sync-design-tokens.mjs`) that reads `design-system/tailwind.theme.json` and emits the `@theme` block. Run it once now; leave a comment in the Next.js package.json `scripts` section explaining how to re-run it when DESIGN.md changes:
+
+```json
+{
+  "scripts": {
+    "sync-tokens": "node scripts/sync-design-tokens.mjs"
+  }
+}
+```
+
+Also copy `design-system/tokens.json` into the Next.js public dir (`public/design-tokens.json`) so runtime tools and the design-system viewer page can fetch it.
+
+### 4. Create the landing page
+Update the Next.js landing page (`src/app/page.tsx` or equivalent) to be a real marketing page for "{{project.name}}". Port the structure and real copy from `brand-output/landing-page.html`, but implement it with **Tailwind utility classes referencing the synced tokens** (e.g., `bg-primary`, `text-on-surface`, `rounded-lg`, `font-display`) — never raw hex codes. The page should be visually polished and match DESIGN.md.
+
+Add a tiny "design system reference" link in the footer pointing at `/design-tokens.json` and a short internal note in a comment: "// Tokens: derived from DESIGN.md. To change, edit DESIGN.md and re-run `npm run sync-tokens`."
 
 ### 4. Verify `aspire run` works
 Run:

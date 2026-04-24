@@ -6,13 +6,14 @@
     "gate": "mnkjyu1d-waj0t5"
   },
   {
-    "from": "planning",
-    "to": "implementation",
-    "condition": "success"
-  },
-  {
     "from": "research",
     "to": "planning",
+    "condition": "success",
+    "gate": "design-md-lint-gate"
+  },
+  {
+    "from": "planning",
+    "to": "implementation",
     "condition": "success"
   },
   {

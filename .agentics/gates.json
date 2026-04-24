@@ -3,5 +3,31 @@
     "id": "mnkjyu1d-waj0t5",
     "name": "Team Hire Gate",
     "requiresApproval": true
+  },
+  {
+    "id": "design-md-lint-gate",
+    "name": "Design System Lint Gate",
+    "description": "Blocks transition out of the Design System station until DESIGN.md passes @google/design.md lint with zero errors. Warnings are surfaced but do not block.",
+    "requiresApproval": false,
+    "tool": {
+      "kind": "cli",
+      "runner": "node",
+      "command": "npx",
+      "args": ["-y", "@google/design.md@0.x", "lint", "DESIGN.md", "--format", "json"],
+      "cwd": "{{project.workspaceDir}}",
+      "timeoutSeconds": 60,
+      "outcome": {
+        "parse": "json",
+        "successOn": { "exitCode": 0 },
+        "passIf": "summary.errors == 0",
+        "warnIf": "summary.warnings > 0",
+        "surface": {
+          "findings": "findings[]",
+          "summary": "summary"
+        }
+      }
+    },
+    "enabled": false,
+    "notes": "Gate is DEFINED but not executable. Execution target (station operator vs. platform sidecar vs. cloud runner) is spec'd in .agentics/specs/gate-tool-runner.md and pending architectural decision. Until execution is wired, the Station 02 orchestrator runs lint manually and attaches the JSON output to its report."
   }
 ]
