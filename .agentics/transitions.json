@@ -4,8 +4,8 @@
     "to": "research",
     "condition": "success",
     "gate": "mnkjyu1d-waj0t5",
-    "_alsoEnforce": ["aesthetic-lock-gate"],
-    "_note": "todo→research is Station 1 (Design Team) → Station 2 (Design System). Team Hire Gate is the human approval. aesthetic-lock-gate is the programmatic check that Station 1 actually ran the fan-out."
+    "_alsoEnforce": ["design-brief-completeness-gate", "aesthetic-lock-gate"],
+    "_note": "todo→research is Station 1 (Design Team) → Station 2 (Design System). Team Hire Gate is the human approval. design-brief-completeness-gate verifies the strategic brief was authored. aesthetic-lock-gate verifies the fan-out ran on top of the brief. Both must pass."
   },
   {
     "from": "research",

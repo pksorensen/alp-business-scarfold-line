@@ -5,6 +5,35 @@
     "requiresApproval": true
   },
   {
+    "id": "design-brief-completeness-gate",
+    "name": "Design Brief Completeness Gate",
+    "description": "Asserts .agentics/BRIEF.md exists and contains all 11 required sections (Industry, Mission, Vision, Values, Positioning, Target audience, Primary persona, Top 3 user goals, Top 3 user pain points, Product type, Primary platform). The strategic brief is the input to /aesthetic-fanout — if it's thin or missing, the resulting aesthetic lock is structurally weak.",
+    "requiresApproval": false,
+    "tool": {
+      "kind": "cli",
+      "runner": "bash",
+      "command": "bash",
+      "args": [
+        "-c",
+        "F=.agentics/BRIEF.md; test -f \"$F\" || { echo '{\"summary\":{\"errors\":1},\"findings\":[{\"severity\":\"error\",\"path\":\"$F\",\"message\":\"BRIEF.md missing — Station 1 did not run /design-brief gather. Strategic brief is the required input to /aesthetic-fanout.\"}]}'; exit 1; }; missing=(); for h in 'Industry' 'Mission' 'Vision' 'Values' 'Positioning' 'Target audience' 'Primary persona' 'Top 3 user goals' 'Top 3 user pain points' 'Product type' 'Primary platform'; do grep -F \"## $h\" \"$F\" >/dev/null || missing+=(\"$h\"); done; if [ ${#missing[@]} -gt 0 ]; then printf '{\"summary\":{\"errors\":%d},\"findings\":[' ${#missing[@]}; first=1; for m in \"${missing[@]}\"; do [ $first -eq 1 ] || printf ','; printf '{\"severity\":\"error\",\"path\":\"BRIEF.md\",\"message\":\"missing section: %s\"}' \"$m\"; first=0; done; printf ']}'; exit 1; fi; echo '{\"summary\":{\"errors\":0,\"warnings\":0},\"findings\":[]}'"
+      ],
+      "cwd": "{{project.workspaceDir}}",
+      "timeoutSeconds": 15,
+      "outcome": {
+        "parse": "json",
+        "successOn": { "exitCode": 0 },
+        "passIf": "summary.errors == 0",
+        "failIf": "summary.errors > 0",
+        "surface": {
+          "findings": "findings[]",
+          "summary": "summary"
+        }
+      }
+    },
+    "enabled": false,
+    "notes": "Defined but not executable. Until execution surface is decided, Station 1 runs /design-brief validate manually before /aesthetic-fanout. This gate fires intra-station between Phase 1 (strategic) and Phase 2 (aesthetic) — semantically before the aesthetic-lock-gate."
+  },
+  {
     "id": "aesthetic-lock-gate",
     "name": "Aesthetic Lock Gate",
     "description": "Asserts that .agentics/AESTHETIC.md exists, was produced by the aesthetic-fanout judge, and has all required sections (signature move, era/mood/archetype tags, anti-pattern blocklist).",

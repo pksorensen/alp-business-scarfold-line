@@ -4,27 +4,40 @@ Project: {{project.name}}
 Change/scope: {{task.title}}
 {{task.description}}
 
-## Step 1 — Pre-flight checks (do these first, before any questions)
+This station has **four phases in strict order**: strategic brief → aesthetic lock → operational intake → scaffold. Reordering produces a generic site.
 
-Run `/foundry-connectivity-check` — if it passes, TTS is available downstream. If it fails or the skill is missing, call stop_broadcast with conclusion failure and message "Foundry TTS check failed — fix proxy config before running this line." Do not proceed.
+## Step 1 — Pre-flight checks
 
-Confirm `/aesthetic-fanout --help`, `/palette-retrieval --help`, `/design-md --help`, and `/design-team --help` all resolve. If any are missing, stop immediately with stop_broadcast failure and the message "Install design-team-plugin >=1.2.0 — required skills missing."
+Run `/foundry-connectivity-check` — fail with stop_broadcast if it doesn't pass.
 
-## Step 2 — Lock the aesthetic direction
+Confirm `/design-brief --help`, `/aesthetic-fanout --help`, `/palette-retrieval --help`, `/design-md --help`, `/design-team --help` all resolve. Stop with stop_broadcast failure if any are missing — message: "Install design-team-plugin >=1.2.0 — required skills missing: <list>."
 
-Run the 3-way aesthetic fan-out:
+## Step 2 — Strategic brief (BEFORE aesthetic)
+
+```
+/design-brief gather
+```
+
+Walks the owner through 3 rounds (Identity, Strategy, Audience & Product). Output: `.agentics/BRIEF.md`.
+
+Then validate:
+```
+/design-brief validate
+```
+
+If any missing sections or generic-answer warnings, loop back via `/design-brief update --section <name>` until the brief is specific. **Do not proceed until the brief is clean** — thin brief produces a thin aesthetic lock.
+
+## Step 3 — Aesthetic fan-out (consumes BRIEF)
 
 ```
 /aesthetic-fanout run
 ```
 
-This produces `.agentics/AESTHETIC.md` — the **locked design direction** every downstream station reads. Do NOT skip this. Without this lock, the design team scaffolds against the training-data median and produces a generic site.
+Refuses to run without `.agentics/BRIEF.md`. Workers and judge read the brief in full; the judge cites audience/pain/positioning when explaining its pick. Output: `.agentics/AESTHETIC.md`.
 
-After it runs, briefly summarize the lock (era / mood / archetype / signature move) for the project owner and surface any open questions the judge flagged.
+Summarize the lock for the project owner: era, mood, archetype, signature move, and how it ties to the brief.
 
-## Step 3 — Scaffold the design team tailored to the lock
-
-Call /design-team with project context AND the locked aesthetic:
+## Step 4 — Scaffold tailored to BRIEF + AESTHETIC
 
 ```
 /design-team {{project.name}}
@@ -32,13 +45,19 @@ Call /design-team with project context AND the locked aesthetic:
 CONTEXT:
 {{project.description}}
 
+BRIEF:
+[full contents of .agentics/BRIEF.md]
+
 AESTHETIC:
 [full contents of .agentics/AESTHETIC.md]
 ```
 
-Pass exactly that — the `CONTEXT:` and `AESTHETIC:` blocks are both required. The skill uses them to tailor each agent's persona to the specific direction (instead of generic "Principal Designer at Apple" personas that average everything back to slop).
+The skill detects all three blocks and skips questions answered in BRIEF (Round 1.2, Round 2, Round 3.1+3.2+3.4, Round 4) and AESTHETIC (Round 1.3+1.4). Asks only the operational residual: tech stack, campaign details, presentation specs.
 
-After the skill completes and the agents are generated, create the agents and team via the API. Report back with:
-- One-paragraph summary of the locked AESTHETIC
-- List of agents created and their team id
-- Any pending approvals
+## Step 5 — Register agents and team via API
+
+Standard registration. Agents created with status 'hiring'.
+
+## Output
+
+Report: BRIEF summary, AESTHETIC summary (with judge's brief-citation), list of agents + team id, any unfilled placeholders (must be zero).
