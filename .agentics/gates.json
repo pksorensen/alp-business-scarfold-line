@@ -5,6 +5,35 @@
     "requiresApproval": true
   },
   {
+    "id": "aesthetic-lock-gate",
+    "name": "Aesthetic Lock Gate",
+    "description": "Asserts that .agentics/AESTHETIC.md exists, was produced by the aesthetic-fanout judge, and has all required sections (signature move, era/mood/archetype tags, anti-pattern blocklist).",
+    "requiresApproval": false,
+    "tool": {
+      "kind": "cli",
+      "runner": "bash",
+      "command": "bash",
+      "args": [
+        "-c",
+        "F=.agentics/AESTHETIC.md; test -f \"$F\" || { echo '{\"summary\":{\"errors\":1},\"findings\":[{\"severity\":\"error\",\"path\":\"$F\",\"message\":\"AESTHETIC.md missing — Station 1 did not run aesthetic-fanout.\"}]}'; exit 1; }; missing=(); for h in 'The signature move' 'Era / Mood / Archetype tags' 'Typographic direction' 'Layout direction' 'Motion direction' 'Anti-patterns this direction commits to never doing'; do grep -F \"## $h\" \"$F\" >/dev/null || missing+=(\"$h\"); done; if [ ${#missing[@]} -gt 0 ]; then printf '{\"summary\":{\"errors\":%d},\"findings\":[' ${#missing[@]}; first=1; for m in \"${missing[@]}\"; do [ $first -eq 1 ] || printf ','; printf '{\"severity\":\"error\",\"path\":\"AESTHETIC.md\",\"message\":\"missing section: %s\"}' \"$m\"; first=0; done; printf ']}'; exit 1; fi; echo '{\"summary\":{\"errors\":0,\"warnings\":0},\"findings\":[]}'"
+      ],
+      "cwd": "{{project.workspaceDir}}",
+      "timeoutSeconds": 30,
+      "outcome": {
+        "parse": "json",
+        "successOn": { "exitCode": 0 },
+        "passIf": "summary.errors == 0",
+        "failIf": "summary.errors > 0",
+        "surface": {
+          "findings": "findings[]",
+          "summary": "summary"
+        }
+      }
+    },
+    "enabled": false,
+    "notes": "Defined but not executable. Until execution surface is decided, Station 1 attaches AESTHETIC.md verbatim to its report so this gate's check can be done manually."
+  },
+  {
     "id": "design-md-lint-gate",
     "name": "Design System Lint Gate",
     "description": "Blocks transition out of the Design System station until DESIGN.md passes @google/design.md lint with zero errors. Warnings are surfaced but do not block.",
@@ -28,6 +57,96 @@
       }
     },
     "enabled": false,
-    "notes": "Gate is DEFINED but not executable. Execution target (station operator vs. platform sidecar vs. cloud runner) is spec'd in .agentics/specs/gate-tool-runner.md and pending architectural decision. Until execution is wired, the Station 02 orchestrator runs lint manually and attaches the JSON output to its report."
+    "notes": "Defined but not executable. Until execution is wired, Station 02 attaches the lint JSON to its report."
+  },
+  {
+    "id": "design-md-extended-sections-gate",
+    "name": "DESIGN.md Extended Sections Gate",
+    "description": "Asserts DESIGN.md contains the four non-normative sections that downstream stations depend on: Voice & Tone, Motion Principles, The Unforgettable Thing, Competitive Differentiators.",
+    "requiresApproval": false,
+    "tool": {
+      "kind": "cli",
+      "runner": "bash",
+      "command": "bash",
+      "args": [
+        "-c",
+        "F=DESIGN.md; test -f \"$F\" || { echo '{\"summary\":{\"errors\":1},\"findings\":[{\"severity\":\"error\",\"path\":\"$F\",\"message\":\"DESIGN.md missing\"}]}'; exit 1; }; missing=(); for h in 'Voice & Tone' 'Motion Principles' 'The Unforgettable Thing' 'Competitive Differentiators'; do grep -F \"## $h\" \"$F\" >/dev/null || missing+=(\"$h\"); done; if [ ${#missing[@]} -gt 0 ]; then printf '{\"summary\":{\"errors\":%d},\"findings\":[' ${#missing[@]}; first=1; for m in \"${missing[@]}\"; do [ $first -eq 1 ] || printf ','; printf '{\"severity\":\"error\",\"path\":\"DESIGN.md\",\"message\":\"missing extended section: %s\"}' \"$m\"; first=0; done; printf ']}'; exit 1; fi; echo '{\"summary\":{\"errors\":0,\"warnings\":0},\"findings\":[]}'"
+      ],
+      "cwd": "{{project.workspaceDir}}",
+      "timeoutSeconds": 15,
+      "outcome": {
+        "parse": "json",
+        "successOn": { "exitCode": 0 },
+        "passIf": "summary.errors == 0",
+        "failIf": "summary.errors > 0",
+        "surface": {
+          "findings": "findings[]",
+          "summary": "summary"
+        }
+      }
+    },
+    "enabled": false,
+    "notes": "Defined but not executable. The 4 extended sections are non-normative per the @google/design.md spec, so we enforce them ourselves."
+  },
+  {
+    "id": "design-brief-approval-gate",
+    "name": "Design Brief Owner Approval Gate",
+    "description": "Asserts every design-brief/*.md has its '[x] Owner approved.' line checked before Station 4 starts implementation.",
+    "requiresApproval": false,
+    "tool": {
+      "kind": "cli",
+      "runner": "bash",
+      "command": "bash",
+      "args": [
+        "-c",
+        "missing=(); for f in design-brief/SIGNATURE-MOVE.md design-brief/LAYOUT.md design-brief/COPY.md design-brief/MOTION.md; do test -f \"$f\" || { missing+=(\"$f (missing)\"); continue; }; grep -F '[x] Owner approved.' \"$f\" >/dev/null || missing+=(\"$f (unchecked)\"); done; if [ ${#missing[@]} -gt 0 ]; then printf '{\"summary\":{\"errors\":%d},\"findings\":[' ${#missing[@]}; first=1; for m in \"${missing[@]}\"; do [ $first -eq 1 ] || printf ','; printf '{\"severity\":\"error\",\"path\":\"%s\",\"message\":\"brief not approved or missing\"}' \"$m\"; first=0; done; printf ']}'; exit 1; fi; echo '{\"summary\":{\"errors\":0,\"warnings\":0},\"findings\":[]}'"
+      ],
+      "cwd": "{{project.workspaceDir}}",
+      "timeoutSeconds": 15,
+      "outcome": {
+        "parse": "json",
+        "successOn": { "exitCode": 0 },
+        "passIf": "summary.errors == 0",
+        "failIf": "summary.errors > 0",
+        "surface": {
+          "findings": "findings[]",
+          "summary": "summary"
+        }
+      }
+    },
+    "enabled": false,
+    "notes": "Defined but not executable. Until execution is wired, Station 4's orchestrator runs this check manually before scaffolding."
+  },
+  {
+    "id": "critique-panel-gate",
+    "name": "Adversarial Critique Panel Gate",
+    "description": "Asserts the 4-persona critique panel ran at least once on the implemented landing page, hit Critic D's automated checks (design-md lint 0 errors, token integrity 0, axe 0, Lighthouse a11y >=95), and either converged or escalated to the project owner. Cap of 3 iterations enforced upstream by the orchestrator.",
+    "requiresApproval": false,
+    "tool": {
+      "kind": "cli",
+      "runner": "bash",
+      "command": "bash",
+      "args": [
+        "-c",
+        "test -f /tmp/critique-final-summary.json || { echo '{\"summary\":{\"errors\":1},\"findings\":[{\"severity\":\"error\",\"path\":\"/tmp/critique-final-summary.json\",\"message\":\"critique panel did not run or did not write its summary\"}]}'; exit 1; }; cat /tmp/critique-final-summary.json"
+      ],
+      "cwd": "{{project.workspaceDir}}",
+      "timeoutSeconds": 30,
+      "outcome": {
+        "parse": "json",
+        "successOn": { "exitCode": 0 },
+        "passIf": "summary.errors == 0 && criticD.designMdErrors == 0 && criticD.tokenIntegrityViolations == 0 && criticD.axeViolations == 0 && criticD.lighthouseA11y >= 95",
+        "warnIf": "summary.warnings > 0",
+        "failIf": "summary.errors > 0",
+        "surface": {
+          "findings": "findings[]",
+          "summary": "summary",
+          "criticD": "criticD",
+          "iterations": "iterations"
+        }
+      }
+    },
+    "enabled": false,
+    "notes": "Defined but not executable. The expected /tmp/critique-final-summary.json schema is documented in the gate-tool-runner spec; Station 4's critique panel writes it. Until execution is wired, Station 4 attaches this file to its report."
   }
 ]

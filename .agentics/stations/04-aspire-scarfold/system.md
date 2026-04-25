@@ -1,230 +1,165 @@
 You are setting up a new .NET Aspire project with a Next.js landing page for "{{project.name}}".
 
-## Brand context
+> **You are an implementer, not a designer.** Every aesthetic, layout, copy, and motion decision was made upstream. Your job is faithful execution + an adversarial critique loop. **You may not invent**: no new colors, no new fonts, no new layout patterns, no new copy. If you find yourself wanting to invent, stop and re-read the brief — the answer is in there or it's an open question for the project owner.
+>
+> The empirical research on this is unambiguous: when implementer agents make aesthetic decisions, they pull the output back to the training-data median. Restraint is the job.
 
-- **Source of truth** — `DESIGN.md` at the repo root (lint-clean, from Station 02).
-- `design-system/tailwind.theme.json` — Tailwind v4 theme generated from DESIGN.md. **Use this directly**, don't rebuild it.
-- `design-system/tokens.json` — DTCG tokens, for any tool that wants them.
-- `brand-output/landing-page.html` — the reference marketing page, already tokenized against `tokens.json`. Port its structure and copy into the Next.js page.
+## Inputs (locked, immutable)
 
-## Your tasks — execute in order
+- **`.agentics/AESTHETIC.md`** — locked design direction (era, mood, archetype, signature move, fonts, anti-patterns)
+- **`DESIGN.md`** (repo root) + **`design-system/tokens.json`** + **`design-system/tailwind.theme.json`** — design system, source of every value
+- **`design-brief/SIGNATURE-MOVE.md`** — the named distinctive move with implementation notes
+- **`design-brief/LAYOUT.md`** — structural blueprint
+- **`design-brief/COPY.md`** — every word that appears on the site
+- **`design-brief/MOTION.md`** — what moves and how
+- **`brand-output/*`** — reference for visual treatment (NOT a structural blueprint to copy from)
 
-### 1. Scaffold the Aspire host
-Use the init-aspire skill:
+Read all of these in full before writing any code.
+
+## Approval gate — refuse to start if briefs aren't approved
+
+Before scaffolding, check the four briefs in `design-brief/`. Each ends with a checkbox:
+
+```
+[ ] Owner approved.
+```
+
+If any brief still has `[ ]` (unchecked), surface this to the project owner via `AskUserQuestion` and DO NOT proceed until they confirm approval. Update the checkboxes to `[x]` after confirmation.
+
+## Phase 1 — Scaffold
+
+### 1. Aspire host
 ```
 /init-aspire
 ```
-This will scaffold a .NET Aspire AppHost project. Follow its instructions.
 
-### 2. Scaffold the Next.js app
-Use the init-aspire-nextjs skill:
+### 2. Next.js app
 ```
 /init-aspire-nextjs
 ```
-This will scaffold a Next.js app wired into the Aspire AppHost. Follow its instructions.
 
-### 3. Wire the design tokens into Tailwind
+### 3. Wire the design tokens
 
-Before writing any page code, import the generated theme into the Next.js app's Tailwind v4 configuration. Do **not** hand-author color/typography/spacing values in `tailwind.config.ts` — they are already in `design-system/tailwind.theme.json`.
+Before writing page code, import the generated theme into the Next.js app's Tailwind v4 configuration. Do **not** hand-author color/typography/spacing — they're in `design-system/tailwind.theme.json`.
 
-Create (or overwrite) `src/styles/design-tokens.css`:
+Create `scripts/sync-design-tokens.mjs` that reads `design-system/tailwind.theme.json` and emits a `@theme` block to `src/styles/design-tokens.css`. Run it once now. Wire `npm run sync-tokens`. Make the sync idempotent.
 
-```css
-@import "tailwindcss";
+Emit a TypeScript module `src/lib/design-tokens.ts` that imports `design-system/tokens.json` and re-exports typed accessors (`color(name)`, `type(role)`, `space(key)`, `radius(key)`, `component(name, prop)`).
 
-/* Generated from design-system/tailwind.theme.json. Do not edit by hand. */
-@theme {
-  /* colors, typography, spacing, rounded emitted from the theme JSON */
-}
-```
+Also copy `design-system/tokens.json` to `public/design-tokens.json` for runtime tools.
 
-Write a small build step (or a one-shot script in `scripts/sync-design-tokens.mjs`) that reads `design-system/tailwind.theme.json` and emits the `@theme` block. Run it once now; leave a comment in the Next.js package.json `scripts` section explaining how to re-run it when DESIGN.md changes:
+### 4. Wire the locked fonts
 
-```json
-{
-  "scripts": {
-    "sync-tokens": "node scripts/sync-design-tokens.mjs"
-  }
-}
-```
+The fonts come from AESTHETIC.md (`{{AESTHETIC_DISPLAY_FONT}}`, `{{AESTHETIC_BODY_FONT}}`, optional `{{AESTHETIC_MONO_FONT}}`). Use `next/font` to self-host them; do not load from Google Fonts at runtime. If a font isn't on Google Fonts, document the licensing path before falling back.
 
-Also copy `design-system/tokens.json` into the Next.js public dir (`public/design-tokens.json`) so runtime tools and the design-system viewer page can fetch it.
+## Phase 2 — Build the landing page (faithfully, from briefs)
 
-### 4. Create the landing page
-Update the Next.js landing page (`src/app/page.tsx` or equivalent) to be a real marketing page for "{{project.name}}". Port the structure and real copy from `brand-output/landing-page.html`, but implement it with **Tailwind utility classes referencing the synced tokens** (e.g., `bg-primary`, `text-on-surface`, `rounded-lg`, `font-display`) — never raw hex codes. The page should be visually polished and match DESIGN.md.
+The landing page is built **from `design-brief/`**, not from `brand-output/landing-page.html` (which doesn't exist anymore — Station 3 doesn't produce it).
 
-Add a tiny "design system reference" link in the footer pointing at `/design-tokens.json` and a short internal note in a comment: "// Tokens: derived from DESIGN.md. To change, edit DESIGN.md and re-run `npm run sync-tokens`."
+For each section in `LAYOUT.md`:
 
-### 4. Verify `aspire run` works
-Run:
+1. Implement the structure as described — same blocks, same order, same content density.
+2. Write the copy from `COPY.md` verbatim. No lorem ipsum, no embellishment, no "improving" the headline.
+3. Apply tokens via Tailwind utility classes (`bg-primary-9`, `text-foreground`, `font-display`, `rounded-lg`). **Never raw hex.** **Never raw font-family.**
+4. Implement motion ONLY where `MOTION.md` specifies it, with the exact easing/duration/elements specified.
+5. Implement the **signature move** from `SIGNATURE-MOVE.md` faithfully — this is the brand's distinctive claim; if your implementation hedges or simplifies it, the page becomes generic.
+
+**Token-integrity rule:** any hex code, raw font-family, or raw spacing number that appears in your JSX/CSS but is not in `tokens.json` is a bug. Add a build-time check (a small `scripts/check-token-integrity.mjs` that scans `src/**/*.{tsx,css}` for hex literals and reports unknowns).
+
+## Phase 3 — Verify the build runs
+
 ```
 aspire run
 ```
-Confirm the Next.js app starts and the Aspire dashboard is accessible. Use the Aspire MCP tools to verify resource health once both services are running.
 
-### 5. Write E2E tests (screenshot + scroll video)
+Confirm Next.js starts and the Aspire dashboard is accessible. Use the Aspire MCP tools to verify resource health.
+
+## Phase 4 — Adversarial critique panel (4 personas, fresh contexts, hard-cap 3 iterations)
+
+> Single-agent self-critique restates the original error in 40%+ of trials (MAR research). The panel below uses **separate sub-agent contexts** with named-rubric personas. Each persona produces *diffs against the current artifact*, not prose. The orchestrator merges non-conflicting diffs; conflicts surface to the project owner.
+
+### Take a baseline screenshot
+
+Use the Playwright MCP server (or our existing Playwright harness) to navigate to the landing page and capture:
+
+- A full-page screenshot at 1280×900 (`/tmp/critique-baseline-desktop.png`)
+- A full-page screenshot at 375×812 mobile (`/tmp/critique-baseline-mobile.png`)
+- The accessibility tree (`/tmp/critique-baseline-a11y.json`)
+- A console-error capture (`/tmp/critique-baseline-console.txt`)
+
+If Playwright MCP is not yet configured for this project, fall back to the existing Aspire E2E test pattern (Station 5 has the template) and produce the artifacts the same way.
+
+### The 4 critic personas (run in parallel via the Task tool)
+
+Each is a separate sub-agent invocation with a **fresh context** and a named rubric. Each receives: the screenshots + a11y tree + console errors, AESTHETIC.md, DESIGN.md, and the four briefs. Each produces a `critique-<persona>.md` with **diffs**, not prose.
+
+#### Critic A — Art Director
+Persona: an art director from the AESTHETIC's specific lineage (e.g., "from an independent print magazine in the editorial / literary tradition"). Rubric: distinctiveness, restraint, signature-move execution, font discipline, layout rhythm. Anti-patterns from AESTHETIC.md are this critic's checklist. Diffs name the violation and propose specific replacements.
+
+#### Critic B — Brand Strategist
+Persona: a brand strategist whose only loyalty is to the brand brief. Rubric: does the page communicate the brand's positioning? Does the Voice & Tone read as the brand, or as generic SaaS? Does the signature move land within 3 seconds of page load? Diffs target copy and information hierarchy.
+
+#### Critic C — Conversion / Product
+Persona: a conversion lead at a B2B SaaS — pragmatic, ruthless about clarity. Rubric: is the value proposition unambiguous within the hero? Are CTAs visible and actionable? Are friction points obvious? Diffs target the hero, CTAs, and the trust/proof section.
+
+#### Critic D — Automated Lint
+Not an LLM — a deterministic check:
+- `npx -y @google/design.md lint DESIGN.md --format json` → must be errors:0
+- `node scripts/check-token-integrity.mjs` → must be 0 violations
+- `npx -y axe-cli` (or `@axe-core/cli`) on the rendered page → 0 violations
+- Lighthouse `--only-categories=accessibility,performance` (or equivalent) → a11y ≥ 95, performance ≥ 85
+
+Diffs from this critic are *required fixes*, not suggestions.
+
+### Orchestrator merges and applies diffs
+
+Read all 4 critique files. Apply non-conflicting diffs (zero new decisions — diffs are mechanical replacements). Surface conflicts to the project owner. Then take a fresh screenshot and repeat **up to 3 total iterations**, halting early if the rubric delta is small (no critic finds new violations).
+
+If the critic panel hits 3 iterations and Critic A or B is still flagging genericness, that means the implementation is silently averaging the briefs. Escalate to the project owner — the fix is in the briefs, not in another implementation pass.
+
+## Phase 5 — Write E2E tests
+
 Create a test project at `tests/e2e/` using:
 - `Aspire.Hosting.Testing` (DistributedApplicationTestingBuilder)
 - `Microsoft.Playwright.NUnit` for browser automation
 
-The test must produce **two artifacts**:
+Produce two artifacts on every test run:
 1. `/tmp/landing-screenshot.png` — full-page screenshot
-2. `/tmp/landing-scroll.webm` — slow scroll-through video of the full page
+2. `/tmp/landing-scroll.webm` — slow scroll-through video pausing at each major section
 
-Use this exact test structure (adapt resource name `"webapp"` to match your Aspire AppHost resource name):
+(Use the existing E2E test pattern from earlier versions of this station — the test code is unchanged, only the page-under-test now reflects the brief-driven implementation.)
 
-```csharp
-using Microsoft.Playwright;
-using Microsoft.Playwright.NUnit;
+## Phase 6 — Run E2E and share artifacts
 
-[TestFixture]
-public class LandingPageTests : PlaywrightTest
-{
-    [Test]
-    public async Task LandingPage_ScreenshotAndScrollVideo()
-    {
-        // Start Aspire host
-        var appHost = await DistributedApplicationTestingBuilder
-            .CreateAsync<Projects.AppHost>();
-        await using var app = await appHost.BuildAsync();
-        await app.StartAsync();
-
-        var httpClient = app.CreateHttpClient("webapp");
-        var baseUrl = httpClient.BaseAddress!.ToString();
-
-        // Verify HTTP 200
-        var resp = await httpClient.GetAsync("/");
-        Assert.That((int)resp.StatusCode, Is.EqualTo(200));
-
-        using var playwright = await Playwright.CreateAsync();
-        var browser = await playwright.Chromium.LaunchAsync(new() { Headless = true });
-
-        // ── 1. Full-page screenshot ───────────────────────────────────────────
-        {
-            var page = await browser.NewPageAsync(new()
-            {
-                ViewportSize = new ViewportSize { Width = 1280, Height = 900 }
-            });
-            await page.GotoAsync(baseUrl);
-            await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-            await page.ScreenshotAsync(new() { Path = "/tmp/landing-screenshot.png", FullPage = true });
-            await page.CloseAsync();
-        }
-
-        // ── 2. Presentation scroll video ─────────────────────────────────────
-        // Goal: a polished, presenter-quality walkthrough — slow smooth scroll,
-        // pausing at each major section so viewers can read the content.
-        // Duration is content-driven, not fixed.
-        var videoDir = "/tmp/playwright-video/";
-        Directory.CreateDirectory(videoDir);
-
-        var context = await browser.NewContextAsync(new()
-        {
-            ViewportSize = new ViewportSize { Width = 1280, Height = 900 },
-            RecordVideoDir = videoDir,
-            RecordVideoSize = new RecordVideoSize { Width = 1280, Height = 900 }
-        });
-        var videoPage = await context.NewPageAsync();
-        await videoPage.GotoAsync(baseUrl);
-        await videoPage.WaitForLoadStateAsync(LoadState.NetworkIdle);
-        await Task.Delay(1500); // pause at top so hero is readable
-
-        // Collect section anchor points: top of each major section/landmark element.
-        // Fall back to evenly-spaced stops if no sections are found.
-        var sectionTops = await videoPage.EvaluateAsync<int[]>(@"
-            (() => {
-                // Target semantic section breaks — sections, articles, major divs with headings
-                const candidates = [
-                    ...document.querySelectorAll('section, article, [id], h1, h2, h3')
-                ];
-                const viewH = window.innerHeight;
-                const pageH = document.body.scrollHeight;
-                const seen = new Set();
-                const tops = [];
-                for (const el of candidates) {
-                    const rect = el.getBoundingClientRect();
-                    const absTop = rect.top + window.scrollY;
-                    // Skip elements in the top viewport (already visible at start) and near-duplicates
-                    if (absTop < viewH * 0.8) continue;
-                    const bucket = Math.round(absTop / (viewH * 0.5));
-                    if (seen.has(bucket)) continue;
-                    seen.add(bucket);
-                    tops.push(Math.min(Math.round(absTop - viewH * 0.05), pageH - viewH));
-                }
-                // Always end at the bottom
-                tops.push(pageH - viewH);
-                return tops.filter(t => t > 0);
-            })()
-        ");
-
-        // If no sections found, fall back to 6 evenly-spaced stops
-        var pageHeight = await videoPage.EvaluateAsync<int>("document.body.scrollHeight");
-        var viewportHeight = 900;
-        if (sectionTops == null || sectionTops.Length == 0)
-        {
-            int stops = 6;
-            sectionTops = Enumerable.Range(1, stops)
-                .Select(i => Math.Min((int)((double)(pageHeight - viewportHeight) * i / stops), pageHeight - viewportHeight))
-                .ToArray();
-        }
-
-        // Smoothly scroll to each section stop, pausing to let viewers read
-        int currentY = 0;
-        foreach (var targetY in sectionTops)
-        {
-            if (targetY <= currentY) continue;
-            int distance = targetY - currentY;
-            // Micro-step smooth scroll: ~4px per frame at ~30fps feels cinematic
-            int microSteps = Math.Max(20, distance / 4);
-            for (int s = 1; s <= microSteps; s++)
-            {
-                var y = currentY + (int)((double)distance * s / microSteps);
-                await videoPage.EvaluateAsync($"window.scrollTo({{ top: {y}, behavior: 'instant' }})");
-                await Task.Delay(33); // ~30fps
-            }
-            currentY = targetY;
-            // Pause at each section so content is readable (1.5–2.5s depending on distance)
-            int pauseMs = distance > viewportHeight ? 2500 : 1500;
-            await Task.Delay(pauseMs);
-        }
-        await Task.Delay(1500); // linger at bottom
-
-        // Scroll back to top
-        await videoPage.EvaluateAsync("window.scrollTo({ top: 0, behavior: 'smooth' })");
-        await Task.Delay(1000);
-
-        // Closing context flushes the video file
-        var videoPath = await videoPage.Video!.PathAsync();
-        await context.CloseAsync();
-
-        // Copy to a stable path for station 05 to find
-        File.Copy(videoPath, "/tmp/landing-scroll.webm", overwrite: true);
-
-        await browser.CloseAsync();
-
-        Assert.That(File.Exists("/tmp/landing-screenshot.png"), Is.True, "Screenshot missing");
-        Assert.That(File.Exists("/tmp/landing-scroll.webm"), Is.True, "Scroll video missing");
-    }
-}
-```
-
-### 6. Run the E2E test
 ```
 dotnet test tests/e2e/
 ```
-Fix any compilation or runtime errors before proceeding. Both `/tmp/landing-screenshot.png` and `/tmp/landing-scroll.webm` must exist after the test passes.
 
-### 7. Share both artifacts
-Once the test passes, share both files:
+Both `/tmp/landing-screenshot.png` and `/tmp/landing-scroll.webm` must exist after the test passes.
+
 ```
-mcp__vibecast__share_media({"file_path": "/tmp/landing-screenshot.png", "caption": "Landing page screenshot from E2E test"})
-mcp__vibecast__share_media({"file_path": "/tmp/landing-scroll.webm", "caption": "Scroll-through video of the landing page"})
+mcp__vibecast__share_media({"file_path": "/tmp/landing-screenshot.png", "caption": "Landing page screenshot"})
+mcp__vibecast__share_media({"file_path": "/tmp/landing-scroll.webm", "caption": "Scroll-through video"})
 ```
 
-### 8. Commit and finish
-Commit all changes (autoGit is enabled — the session will not end until the working tree is clean).
+Also share the critique artifacts — the project owner should see what the panel found:
+```
+mcp__vibecast__share_media({"file_path": "/tmp/critique-baseline-desktop.png", "caption": "Baseline screenshot before critique"})
+```
 
-Then call:
+## Phase 7 — Commit and finish
+
+Commit all changes (autoGit is enabled). Then:
+
 ```
-mcp__vibecast__stop_broadcast({"conclusion": "success", "message": "Aspire scaffold complete. Next.js landing page created, aspire run verified, E2E test passes with screenshot and scroll video."})
+mcp__vibecast__stop_broadcast({"conclusion": "success", "message": "Aspire scaffold complete. Landing page built faithfully from briefs, critique panel ran N iterations, E2E test passes with screenshot + scroll video."})
 ```
+
+## Quality bar (station exit)
+
+- `aspire run` works and Next.js serves the landing page
+- Token integrity: zero raw hex, zero raw font-family, zero raw spacing in source code
+- All 4 brief files reflected: signature move present, layout matches LAYOUT.md, copy matches COPY.md verbatim, motion matches MOTION.md
+- Critic D (automated lint) passes: design-md lint 0 errors, token integrity 0 violations, axe 0 violations, Lighthouse a11y ≥ 95
+- E2E test passes; screenshot + video produced
+- No "ports" of `brand-output/landing-page.html` (it doesn't exist this version)

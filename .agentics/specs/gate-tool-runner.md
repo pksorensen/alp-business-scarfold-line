@@ -2,7 +2,7 @@
 
 **Status:** Draft — schema defined, execution **not** enabled.
 **Owner:** Platform (Agentic Live).
-**Last updated:** 2026-04-24.
+**Last updated:** 2026-04-25.
 
 Gates today are binary human-approval switches (`requiresApproval: true`). This spec extends gates — and, symmetrically, transitions — with the ability to run a **tool** (a deterministic, non-agentic process) and decide pass/fail/warn from its output. The immediate motivating use case is running `@google/design.md lint DESIGN.md` between the Design System station and Brand Deliverables station, but the shape is generic.
 
@@ -233,6 +233,96 @@ When the tool-backed gate evaluates:
 - **Raw output drawer** — full stdout/stderr, `exitCode`, `durationMs`, runner version
 
 ---
+
+## Multi-gate transitions — `_alsoEnforce`
+
+A transition currently references one gate via the `gate: <id>` field. In practice we sometimes want **two or three** programmatic gates on the same transition (e.g., research→planning enforces both `design-md-lint-gate` AND `design-md-extended-sections-gate`).
+
+The current `transitions.json` shape doesn't allow this. To keep the schema minimally invasive while we decide, we use:
+
+```jsonc
+{
+  "from": "research",
+  "to": "planning",
+  "condition": "success",
+  "gate": "design-md-lint-gate",          // primary gate (existing field, unchanged)
+  "_alsoEnforce": ["design-md-extended-sections-gate"], // ← NEW
+  "_note": "DESIGN.md must lint clean AND have the 4 extended sections."
+}
+```
+
+`_alsoEnforce` is an array of gate ids. When execution is wired, all listed gates run; the transition advances only if **every** gate's tool returns `pass` (or `warn` with `approveWarnings: true`). The primary `gate` field is retained for backwards compatibility — if you only have one gate, ignore `_alsoEnforce`.
+
+`_note` is an informational field shown on the transition card in the UI. Underscore-prefixed keys are reserved for human/tooling annotations and are ignored by the executor.
+
+## Critique-panel result schema
+
+The `critique-panel-gate` reads `/tmp/critique-final-summary.json` (path is deliberately platform-agnostic; runners route through `cwd`). The implementer in Station 4 writes this file at the end of its critique loop.
+
+```jsonc
+{
+  "summary": {
+    "errors": 0,
+    "warnings": 0
+  },
+  "iterations": 2,                        // number of panel passes (≤3)
+  "convergence": "converged" ,            // "converged" | "halted-on-cap" | "escalated"
+  "criticA": {                            // Art Director (design-critique-partner agent)
+    "blockers": 0,
+    "majors": 1,
+    "minors": 3,
+    "verdict": "PASS",
+    "reportPath": "/tmp/critique-art-director.md"
+  },
+  "criticB": {                            // Brand Strategist
+    "blockers": 0,
+    "majors": 0,
+    "minors": 2,
+    "verdict": "PASS",
+    "reportPath": "/tmp/critique-brand-strategist.md"
+  },
+  "criticC": {                            // Conversion / Product
+    "blockers": 0,
+    "majors": 0,
+    "minors": 1,
+    "verdict": "PASS",
+    "reportPath": "/tmp/critique-conversion.md"
+  },
+  "criticD": {                            // Automated Lint (deterministic)
+    "designMdErrors": 0,
+    "designMdWarnings": 2,
+    "tokenIntegrityViolations": 0,       // hex/font/spacing values not in tokens.json
+    "axeViolations": 0,
+    "lighthouseA11y": 98,
+    "lighthousePerf": 89,
+    "verdict": "PASS",
+    "reportPath": "/tmp/critique-automated-lint.json"
+  },
+  "findings": [                           // merged across critics, with provenance
+    {
+      "severity": "major",
+      "critic": "criticA",
+      "where": "hero",
+      "message": "Headline weight 600 contradicts AESTHETIC's editorial direction (200/300 weight)",
+      "diffApplied": true
+    }
+  ],
+  "appliedDiffs": 4,                      // mechanical replacements that landed automatically
+  "escalatedConflicts": []                // surfaced to project owner; non-empty here = warn or fail
+}
+```
+
+The gate's `passIf` expression in `gates.json` references this shape:
+
+```
+summary.errors == 0
+&& criticD.designMdErrors == 0
+&& criticD.tokenIntegrityViolations == 0
+&& criticD.axeViolations == 0
+&& criticD.lighthouseA11y >= 95
+```
+
+If a critic returns `verdict: RETURN-FOR-FIXES` and the panel hits the iteration cap without converging, `convergence` is set to `halted-on-cap` and `escalatedConflicts` lists the unresolved findings. The gate fails with those findings shown on the gate card.
 
 ## Migration plan (when execution ships)
 

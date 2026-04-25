@@ -3,22 +3,30 @@
     "from": "todo",
     "to": "research",
     "condition": "success",
-    "gate": "mnkjyu1d-waj0t5"
+    "gate": "mnkjyu1d-waj0t5",
+    "_alsoEnforce": ["aesthetic-lock-gate"],
+    "_note": "todo→research is Station 1 (Design Team) → Station 2 (Design System). Team Hire Gate is the human approval. aesthetic-lock-gate is the programmatic check that Station 1 actually ran the fan-out."
   },
   {
     "from": "research",
     "to": "planning",
     "condition": "success",
-    "gate": "design-md-lint-gate"
+    "gate": "design-md-lint-gate",
+    "_alsoEnforce": ["design-md-extended-sections-gate"],
+    "_note": "research→planning is Station 2 (Design System) → Station 3 (Brand Deliverables). DESIGN.md must lint clean AND have the 4 extended sections."
   },
   {
     "from": "planning",
     "to": "implementation",
-    "condition": "success"
+    "condition": "success",
+    "gate": "design-brief-approval-gate",
+    "_note": "planning→implementation is Station 3 (Briefs) → Station 4 (Implementation). All four briefs must be owner-approved before Station 4 starts."
   },
   {
     "from": "implementation",
     "to": "testing",
-    "condition": "success"
+    "condition": "success",
+    "gate": "critique-panel-gate",
+    "_note": "implementation→testing is Station 4 (Implementation) → Station 5 (E2E Proof). The critique panel must have run."
   }
 ]
