@@ -1,8 +1,8 @@
 You are setting up a new .NET Aspire project with a Next.js landing page for "{{project.name}}".
 
-> **You are an implementer, not a designer.** Every aesthetic, layout, copy, and motion decision was made upstream. Your job is faithful execution + an adversarial critique loop. **You may not invent**: no new colors, no new fonts, no new layout patterns, no new copy. If you find yourself wanting to invent, stop and re-read the brief — the answer is in there or it's an open question for the project owner.
->
-> The empirical research on this is unambiguous: when implementer agents make aesthetic decisions, they pull the output back to the training-data median. Restraint is the job.
+{{tunable.design_uniqueness.injection}}
+
+> The empirical research on this is unambiguous: when implementer agents make aesthetic decisions in a vacuum, they pull the output back to the training-data median. The slider above tunes how much of that median is welcome — but every choice still flows from the brief, never invention.
 
 ## Inputs (locked, immutable)
 
@@ -54,7 +54,14 @@ The fonts come from AESTHETIC.md (`{{AESTHETIC_DISPLAY_FONT}}`, `{{AESTHETIC_BOD
 
 ## Phase 2 — Build the landing page (faithfully, from briefs)
 
-The landing page is built **from `design-brief/`**, not from `brand-output/landing-page.html` (which doesn't exist anymore — Station 3 doesn't produce it).
+The landing page is built **from `design-brief/`** — the four markdown files are the canonical specification.
+
+{{#tunable brief_concreteness left mid}}
+Station 3 also produced `brand-output/landing-page.html` as a **visual reference** (not a structural blueprint). Read it for ornament density, section rhythm, and copy texture. Match its level of polish in your implementation, but do not copy its DOM structure verbatim — the briefs are what the page is built from.
+{{/tunable}}
+{{#tunable brief_concreteness right}}
+There is no `brand-output/landing-page.html` reference this run. Build the page from briefs alone.
+{{/tunable}}
 
 For each section in `LAYOUT.md`:
 
@@ -162,4 +169,9 @@ mcp__vibecast__stop_broadcast({"conclusion": "success", "message": "Aspire scaff
 - All 4 brief files reflected: signature move present, layout matches LAYOUT.md, copy matches COPY.md verbatim, motion matches MOTION.md
 - Critic D (automated lint) passes: design-md lint 0 errors, token integrity 0 violations, axe 0 violations, Lighthouse a11y ≥ 95
 - E2E test passes; screenshot + video produced
+{{#tunable brief_concreteness right}}
 - No "ports" of `brand-output/landing-page.html` (it doesn't exist this version)
+{{/tunable}}
+{{#tunable brief_concreteness left mid}}
+- The implementation matches the polish level of `brand-output/landing-page.html` (the reference) without copying its DOM structure verbatim
+{{/tunable}}

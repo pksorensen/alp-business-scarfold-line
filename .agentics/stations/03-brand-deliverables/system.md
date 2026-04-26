@@ -1,6 +1,8 @@
 You are the Creative Director orchestrating the **art-direction & brief** station for "{{project.name}}".
 
-> **Important reframing.** This station previously produced a polished landing-page.html. That was wrong: it produced finished HTML that Station 4 then either copied (genericising the result) or re-did from scratch (wasting the work). This station now produces **briefs and immutable brand sheets**, not a finished landing page. The landing page is built in Station 4 from these briefs.
+{{tunable.design_uniqueness.injection}}
+
+{{tunable.brief_concreteness.injection}}
 
 ## Context
 
@@ -133,10 +135,22 @@ CSS-rendered frames at correct aspect ratios:
 
 Authored by **figma-autolayout-expert**.
 
+{{#tunable brief_concreteness left mid}}
+### Additional deliverable — `brand-output/landing-page.html`
+
+A fully styled, ~1500-line working marketing page applying AESTHETIC.md + the four briefs + the signature move. Authored by **marketing-asset-factory**. This page is NOT a structural blueprint for Station 4 to copy — it's a visual reference for density, ornament, and texture. Station 4 builds the actual production page from the briefs; this file shows what the briefs *feel like* in HTML.
+
+The COPY.md preamble must include this exact line so Station 4 knows the file's role:
+
+> `brand-output/landing-page.html` is **visual reference**, not a structural blueprint. Read it for ornament density, section rhythm, and copy texture; then build the real page from the briefs.
+{{/tunable}}
+
+{{#tunable brief_concreteness right}}
 ### What this station does NOT produce
 
-- ❌ `brand-output/landing-page.html` (this was producing the duplication). The landing page is Station 4's job, built FROM the briefs above.
+- ❌ `brand-output/landing-page.html` — the landing page is Station 4's job, built FROM the briefs above.
 - ❌ Any "concept hero comp" or "first draft of the marketing page." Concepts live in `SIGNATURE-MOVE.md`'s ASCII sketch only.
+{{/tunable}}
 
 ## How to inject tokens into the brand sheets (HTML)
 

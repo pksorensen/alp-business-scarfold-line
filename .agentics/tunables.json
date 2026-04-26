@@ -1,0 +1,42 @@
+{
+  "version": "1.0",
+  "tunables": [
+    {
+      "id": "design_uniqueness",
+      "label": "Design direction",
+      "leftPole": "Traditional SaaS",
+      "rightPole": "Distinctive editorial",
+      "default": 0.5,
+      "description": "How strict the aesthetic anti-pattern blocklist is, and how free the implementer is to apply standard SaaS conventions (testimonial cards with stars, 3-tier pricing grid, gradient hero, hero illustration, hover-transform cards, etc.). Left = competitor-recognisable templates, right = single-distinctive-move with everything generic stripped.",
+      "awareness": "Treat this slider as a continuous gradient of design risk. 0.0 = textbook B2B SaaS landing page using the patterns the audience already recognises (gradient hero, social-proof logo strip, 3-tier pricing, hover transforms, animated counters). 1.0 = distinctive editorial that refuses every pattern that looks like a competitor — the locked signature move IS the page. Mid = base brief with selective ornamentation. Bias your micro-decisions about ornament density, section presence, and visual ambition along this axis.",
+      "injection": {
+        "planning": {
+          "left": "**Design-direction setting: Traditional SaaS.** The anti-pattern blocklist below is ADVISORY, not absolute. Standard SaaS landing-page patterns are EXPLICITLY ALLOWED if they fit the brief: testimonial cards with stars, 3-tier pricing grid, gradient hero, hero illustration, social-proof logo strip, animated counters, hover-transform cards. The marketing-asset-factory agent should bring SaaS pattern fluency — these patterns work because the audience already knows how to read them. The signature move from AESTHETIC.md still anchors the hero, but supporting sections should feel like a competent SaaS marketing site, not a magazine.",
+          "mid": "**Design-direction setting: Balanced.** The anti-pattern blocklist applies UNLESS COPY.md explicitly whitelists a pattern. Most standard SaaS sections (pricing, testimonials, FAQ, social proof) are allowed but each one must be justified in COPY.md as serving the brief, not as ornament. Lean into the signature move; lean away from competitor look-alike chrome.",
+          "right": "**Design-direction setting: Distinctive editorial.** The anti-pattern blocklist is HARD. Reject every standard SaaS template move. The signature move IS the page; ornament for ornament's sake is forbidden. Sections that don't earn their distinctive treatment should be cut, not styled in default-SaaS form."
+        },
+        "implementation": {
+          "left": "**Design-direction setting: Traditional SaaS.** You have license to apply standard SaaS section conventions for non-signature areas (pricing, testimonials, FAQ, social proof). The marketing-asset-factory agent contributes texture and ornament alongside faithful brief execution. Inventing within established SaaS-pattern grammar is allowed — match audience expectations.",
+          "mid": "**Design-direction setting: Balanced.** Faithfully execute the brief. For non-signature sections you may add standard SaaS conventions if they're consistent with the design system tokens; for signature sections, no invention. Bias toward visual restraint but don't strip every supporting section to bare structure.",
+          "right": "**Design-direction setting: Distinctive editorial.** You are an implementer, not a designer. Every aesthetic decision was made upstream — your job is faithful execution + an adversarial critique loop. You may not invent: no new colors, no new fonts, no new layout patterns, no new copy. If you find yourself wanting to invent, stop and re-read the brief — the answer is in there or it's an open question for the project owner. Restraint is the job."
+        }
+      }
+    },
+    {
+      "id": "brief_concreteness",
+      "label": "Brief style",
+      "leftPole": "Worked HTML reference",
+      "rightPole": "Abstract markdown briefs",
+      "default": 0.5,
+      "description": "Whether station 3 (Brand Deliverables) produces a worked landing-page.html (concrete reference) or only abstract design-brief markdown files. Worked HTML gives station 4 visual gravity (rhythm, ornament density, micro-decorations). Abstract briefs force station 4 to interpret intent from prose only.",
+      "awareness": "0.0 = author a fully styled, ~1500-line landing-page.html that applies AESTHETIC.md + COPY.md + the signature move and stands as the visual reference. 1.0 = produce only the four design-brief markdown files; station 4 builds the page from prose. Mid = produce both. The HTML reference is NOT a structural blueprint to copy — it's visual gravity.",
+      "injection": {
+        "planning": {
+          "left": "**Brief-style setting: Worked HTML reference.** ALSO produce `brand-output/landing-page.html` — a fully styled, ~1500-line working marketing page applying AESTHETIC.md + the four briefs + the signature move. The marketing-asset-factory agent owns this. Frame it for station 4 in the COPY.md preamble as: 'visual reference for density, ornament, and texture — not a structural blueprint to copy. Station 4 builds the actual page from briefs; this file shows what the briefs *feel like* in HTML.'",
+          "mid": "**Brief-style setting: Balanced.** Produce both: the design-brief markdown files (canonical) AND a `brand-output/landing-page.html` reference that applies them. The HTML reference exists to give station 4 visual gravity — without it, station 4 tends to under-decorate.",
+          "right": "**Brief-style setting: Abstract briefs only.** Produce ONLY the four design-brief markdown files (`SIGNATURE-MOVE.md`, `LAYOUT.md`, `COPY.md`, `MOTION.md`). Do NOT write `brand-output/landing-page.html` — it duplicates work and tends to genericise the result. The landing page is station 4's job, built from briefs."
+        }
+      }
+    }
+  ]
+}
