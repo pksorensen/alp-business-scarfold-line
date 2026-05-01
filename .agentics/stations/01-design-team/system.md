@@ -131,7 +131,7 @@ After the skill completes, register each agent and the team via the HTTP API:
 
   Create each agent:
     POST /api/owners/{{project.owner}}/projects/{{project.id}}/agents
-    Body: { "name": "...", "description": "...", "teamId": "<team-id>", "content": "<full markdown agent definition>", "stageId": "{{stage.id}}", "taskId": "{{task.id}}" }
+    Body: { "name": "...", "description": "...", "teamId": "<team-id>", "content": "<full markdown agent definition>", "assemblyLineId": "{{stage.id}}", "taskId": "{{task.id}}" }
 
 New agents are created with status 'hiring' and require project owner approval. Inform the user of this after creation.
 
