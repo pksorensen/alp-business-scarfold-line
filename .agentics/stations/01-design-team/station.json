@@ -6,6 +6,7 @@
     "autoApproveImageUploads": true
   },
   "trigger": {
-    "type": "dispatch_worker"
+    "type": "dispatch_worker",
+    "autoGit": true
   }
 }
