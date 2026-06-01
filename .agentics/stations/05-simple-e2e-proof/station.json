@@ -1,7 +1,7 @@
 {
   "id": "testing",
   "name": "Simple E2E Proof",
-  "pluginIds": ["pks-foundry", "aspire-e2e-cinematic-tests"],
+  "pluginIds": ["pks-foundry", "pks-aspire-e2e"],
   "operatorConfig": {
     "autoApproveImageUploads": true
   },
